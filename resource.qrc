@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="ICONS">
+    <file>res/information.png</file>
+    <file>res/disk_multiple.png</file>
+    <file>res/disk.png</file>
+    <file>res/folder.png</file>
+    <file>res/picture_save.png</file>
+    <file>res/zoom_in.png</file>
+    <file>res/zoom_out.png</file>
+    <file>res/zoom.png</file>
+  </qresource>
+</RCC>

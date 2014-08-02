@@ -1,0 +1,5 @@
+*.exe
+*.sh
+potrace
+__pycache__
+*.pyc
