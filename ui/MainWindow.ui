@@ -627,6 +627,9 @@
    <property name="text">
     <string>SaveAs...</string>
    </property>
+   <property name="toolTip">
+    <string>SaveAs...</string>
+   </property>
   </action>
   <action name="actionHelpAbout">
    <property name="icon">
