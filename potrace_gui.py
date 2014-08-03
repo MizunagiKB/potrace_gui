@@ -4,6 +4,7 @@
 import sys
 import os
 import subprocess
+import configparser
 
 import PyQt5
 import PyQt5.QtCore
@@ -14,7 +15,6 @@ import PyQt5.QtWidgets
 import ui_MainWindow
 import ui_About
 
-POTRACE_BIN = "bin/potrace"
 DEFAULT_ARGV = [
     "-s",
     "-o-"
@@ -52,6 +52,9 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
         self.PotraceAbsPath = strPath
 
+# -----------------------------------------------------------------------
+##
+#
     def save(self, strPathname, strBackend):
 
         listSave = [
@@ -65,6 +68,9 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
         subprocess.check_output(listArgv)
 
+    # -----------------------------------------------------------------------
+    ##
+    #
     def open(self, strPathname):
 
         if(strPathname != self.CurrentSVGFile):
@@ -131,6 +137,19 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
         self.setCentralWidget(self.m_oCViewSVG)
 
+
+        ## Configure Reader
+
+        strConfigurePath = os.path.join(os.getcwd(), "potrace_gui.conf")
+
+        if(os.path.exists(strConfigurePath) is True):
+            oCConf = configparser.ConfigParser()
+            oCConf.read(strConfigurePath)
+
+            self.m_oCViewSVG.set_potrace_path(
+                oCConf["POTRACE_GUI"]["POTRACE_BIN_PATH"]
+            )
+
         ## Event Connect
 
         self.ui.actionFileOpen.triggered.connect(self.actionFileOpen)
@@ -138,6 +157,8 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         self.ui.actionViewZoomIn.triggered.connect(self.actionViewZoomIn)
         self.ui.actionViewZoomOut.triggered.connect(self.actionViewZoomOut)
         self.ui.actionViewZoomReset.triggered.connect(self.actionViewZoomReset)
+        self.ui.actionViewRefresh.triggered.connect(self.actionViewRefresh)
+        self.ui.actionViewAutoRefresh.triggered.connect(self.actionViewAutoRefresh)
         self.ui.actionHelpAbout.triggered.connect(self.actionHelpAbout)
 
         self.ui.ptTurnpolicy.currentIndexChanged.connect(self.currentIndexChanged)
@@ -176,10 +197,9 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
             listArgv.append("--tight")
 
         self.m_oCViewSVG.set_argv(listArgv)
-        self.m_oCViewSVG.reload()
 
-    def set_potrace_path(self, strPath):
-        self.m_oCViewSVG.set_potrace_path(strPath)
+        if(self.ui.actionViewAutoRefresh.isChecked() is True):
+            self.m_oCViewSVG.reload()
 
     def currentIndexChanged(self, nIndex):
         self.__build_potrace_argv()
@@ -243,6 +263,13 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
     def actionViewZoomReset(self):
         self.m_oCViewSVG.resetTransform()
 
+    def actionViewRefresh(self):
+        self.m_oCViewSVG.reload()
+
+    def actionViewAutoRefresh(self, bChecked):
+        if(bChecked is True):
+            self.m_oCViewSVG.reload()
+
     def actionHelpAbout(self):
         oCAbout = CAbout()
         oCAbout.exec()
@@ -262,19 +289,13 @@ class CAbout(PyQt5.QtWidgets.QDialog):
 #
 def main():
 
-    if(os.path.exists(POTRACE_BIN) is True):
+    oCApp = PyQt5.QtWidgets.QApplication(sys.argv)
 
-        oCApp = PyQt5.QtWidgets.QApplication(sys.argv)
+    oCMain = CMainWindow()
+    oCMain.show()
 
-        oCMain = CMainWindow()
-        oCMain.set_potrace_path(os.path.abspath(POTRACE_BIN))
-        oCMain.show()
+    return(oCApp.exec_())
 
-        return(oCApp.exec_())
-
-    else:
-
-        return(-1)
 
 if(__name__ == '__main__'):
     sys.exit(main())
