@@ -22,5 +22,5 @@ resource_rc.py: resource.qrc
 	$(PYRCC) $< -o $@
 
 .PHONY: run
-run:
+run: PYUIC PYRCC
 	$(PYTHON3) potrace_gui.py
