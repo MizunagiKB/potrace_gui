@@ -1,0 +1,4 @@
+[POTRACE_GUI]
+
+# potrace が置いてある場所をフルパスで指定してください。
+POTRACE_BIN_PATH:
