@@ -1,5 +1,8 @@
-*.exe
-*.sh
+bin
+build
 potrace
 __pycache__
+*.conf
+*.exe
 *.pyc
+*.sh
