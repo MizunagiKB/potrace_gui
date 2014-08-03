@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/MainWindow.ui'
 #
-# Created: Sun Aug  3 11:39:18 2014
+# Created: Sun Aug  3 20:32:33 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -200,10 +200,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_18.addWidget(self.btnSaveAs)
         self.dockWidget_7.setWidget(self.dockWidgetContents_9)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget_7)
-        self.toolBar_3 = QtWidgets.QToolBar(MainWindow)
-        self.toolBar_3.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
-        self.toolBar_3.setObjectName("toolBar_3")
-        MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar_3)
         self.actionFileClose = QtWidgets.QAction(MainWindow)
         self.actionFileClose.setObjectName("actionFileClose")
         self.actionFileOpen = QtWidgets.QAction(MainWindow)
@@ -276,7 +272,6 @@ class Ui_MainWindow(object):
         self.toolBar_2.addSeparator()
         self.toolBar_2.addAction(self.actionViewRefresh)
         self.toolBar_2.addAction(self.actionViewAutoRefresh)
-        self.toolBar_3.addAction(self.actionFileSaveAs)
 
         self.retranslateUi(MainWindow)
         self.ptTurnpolicy.setCurrentIndex(4)
@@ -345,7 +340,6 @@ class Ui_MainWindow(object):
         self.ptBackend.setItemText(7, _translate("MainWindow", "gimppath"))
         self.ptBackend.setItemText(8, _translate("MainWindow", "xfig"))
         self.btnSaveAs.setText(_translate("MainWindow", "SaveAs..."))
-        self.toolBar_3.setWindowTitle(_translate("MainWindow", "toolBar_3"))
         self.actionFileClose.setText(_translate("MainWindow", "Close"))
         self.actionFileClose.setToolTip(_translate("MainWindow", "Close"))
         self.actionFileOpen.setText(_translate("MainWindow", "Open"))
