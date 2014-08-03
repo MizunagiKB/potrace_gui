@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="ICONS">
+    <file>res/arrow_refresh.png</file>
+    <file>res/picture_link.png</file>
     <file>res/information.png</file>
     <file>res/disk_multiple.png</file>
     <file>res/disk.png</file>

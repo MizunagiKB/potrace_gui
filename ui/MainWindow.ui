@@ -46,6 +46,9 @@
     <addaction name="actionViewZoomOut"/>
     <addaction name="separator"/>
     <addaction name="actionViewZoomReset"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewRefresh"/>
+    <addaction name="actionViewAutoRefresh"/>
    </widget>
    <addaction name="menu_F"/>
    <addaction name="menu_View"/>
@@ -85,6 +88,9 @@
    <addaction name="actionViewZoomOut"/>
    <addaction name="separator"/>
    <addaction name="actionViewZoomReset"/>
+   <addaction name="separator"/>
+   <addaction name="actionViewRefresh"/>
+   <addaction name="actionViewAutoRefresh"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget_7">
    <property name="minimumSize">
@@ -558,7 +564,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionHelpAbout"/>
+   <addaction name="actionFileSaveAs"/>
   </widget>
   <action name="actionFileClose">
    <property name="text">
@@ -628,7 +634,7 @@
     <string>SaveAs...</string>
    </property>
    <property name="toolTip">
-    <string>SaveAs...</string>
+    <string>SaveAs</string>
    </property>
   </action>
   <action name="actionHelpAbout">
@@ -638,6 +644,30 @@
    </property>
    <property name="text">
     <string>About...</string>
+   </property>
+  </action>
+  <action name="actionViewRefresh">
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/ICONS/res/arrow_refresh.png</normaloff>:/ICONS/res/arrow_refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionViewAutoRefresh">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/ICONS/res/picture_link.png</normaloff>:/ICONS/res/picture_link.png</iconset>
+   </property>
+   <property name="text">
+    <string>AutoRefresh</string>
    </property>
   </action>
  </widget>

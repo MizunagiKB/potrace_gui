@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/MainWindow.ui'
 #
-# Created: Sat Aug  2 22:02:19 2014
+# Created: Sun Aug  3 11:39:18 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -241,6 +241,17 @@ class Ui_MainWindow(object):
         icon7.addPixmap(QtGui.QPixmap(":/ICONS/res/information.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionHelpAbout.setIcon(icon7)
         self.actionHelpAbout.setObjectName("actionHelpAbout")
+        self.actionViewRefresh = QtWidgets.QAction(MainWindow)
+        icon8 = QtGui.QIcon()
+        icon8.addPixmap(QtGui.QPixmap(":/ICONS/res/arrow_refresh.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionViewRefresh.setIcon(icon8)
+        self.actionViewRefresh.setObjectName("actionViewRefresh")
+        self.actionViewAutoRefresh = QtWidgets.QAction(MainWindow)
+        self.actionViewAutoRefresh.setCheckable(True)
+        icon9 = QtGui.QIcon()
+        icon9.addPixmap(QtGui.QPixmap(":/ICONS/res/picture_link.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionViewAutoRefresh.setIcon(icon9)
+        self.actionViewAutoRefresh.setObjectName("actionViewAutoRefresh")
         self.menu_F.addAction(self.actionFileOpen)
         self.menu_F.addAction(self.actionFileSaveAs)
         self.menu_F.addSeparator()
@@ -250,6 +261,9 @@ class Ui_MainWindow(object):
         self.menu_View.addAction(self.actionViewZoomOut)
         self.menu_View.addSeparator()
         self.menu_View.addAction(self.actionViewZoomReset)
+        self.menu_View.addSeparator()
+        self.menu_View.addAction(self.actionViewRefresh)
+        self.menu_View.addAction(self.actionViewAutoRefresh)
         self.menubar.addAction(self.menu_F.menuAction())
         self.menubar.addAction(self.menu_View.menuAction())
         self.menubar.addAction(self.menu_Help.menuAction())
@@ -259,7 +273,10 @@ class Ui_MainWindow(object):
         self.toolBar_2.addAction(self.actionViewZoomOut)
         self.toolBar_2.addSeparator()
         self.toolBar_2.addAction(self.actionViewZoomReset)
-        self.toolBar_3.addAction(self.actionHelpAbout)
+        self.toolBar_2.addSeparator()
+        self.toolBar_2.addAction(self.actionViewRefresh)
+        self.toolBar_2.addAction(self.actionViewAutoRefresh)
+        self.toolBar_3.addAction(self.actionFileSaveAs)
 
         self.retranslateUi(MainWindow)
         self.ptTurnpolicy.setCurrentIndex(4)
@@ -339,6 +356,10 @@ class Ui_MainWindow(object):
         self.actionViewZoomReset.setText(_translate("MainWindow", "ZoomReset"))
         self.actionFileSave.setText(_translate("MainWindow", "Save"))
         self.actionFileSaveAs.setText(_translate("MainWindow", "SaveAs..."))
+        self.actionFileSaveAs.setToolTip(_translate("MainWindow", "SaveAs"))
         self.actionHelpAbout.setText(_translate("MainWindow", "About..."))
+        self.actionViewRefresh.setText(_translate("MainWindow", "Refresh"))
+        self.actionViewRefresh.setShortcut(_translate("MainWindow", "Ctrl+R"))
+        self.actionViewAutoRefresh.setText(_translate("MainWindow", "AutoRefresh"))
 
 import resource_rc
