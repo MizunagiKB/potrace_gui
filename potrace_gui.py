@@ -20,6 +20,11 @@ DEFAULT_ARGV = [
     "-o-"
 ]
 
+
+# ------------------------------------------------------------------ class(s)
+# ---------------------------------------------------------------------------
+##
+#
 class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
     m_listArgv = []
@@ -27,17 +32,27 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
     CurrentSVGData = ""
     PotraceAbsPath = ""
 
+    # -----------------------------------------------------------------------
+    ##
+    #
     def __init__(self):
         super(CViewSVG, self).__init__()
 
-        self.svgItem = None
-
-        self.setScene(PyQt5.QtWidgets.QGraphicsScene(self))
-        self.setTransformationAnchor(PyQt5.QtWidgets.QGraphicsView.AnchorUnderMouse)
-        self.setDragMode(PyQt5.QtWidgets.QGraphicsView.ScrollHandDrag)
-        self.setViewportUpdateMode(PyQt5.QtWidgets.QGraphicsView.FullViewportUpdate)
+        self.setScene(
+            PyQt5.QtWidgets.QGraphicsScene(self)
+        )
+        self.setTransformationAnchor(
+            PyQt5.QtWidgets.QGraphicsView.AnchorUnderMouse
+        )
+        self.setDragMode(
+            PyQt5.QtWidgets.QGraphicsView.ScrollHandDrag
+        )
+        self.setViewportUpdateMode(
+            PyQt5.QtWidgets.QGraphicsView.FullViewportUpdate
+        )
 
         # Prepare background check-board pattern.
+
         tilePixmap = PyQt5.QtGui.QPixmap(64, 64)
         tilePixmap.fill(PyQt5.QtCore.Qt.white)
         tilePainter = PyQt5.QtGui.QPainter(tilePixmap)
@@ -52,9 +67,9 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
         self.PotraceAbsPath = strPath
 
-# -----------------------------------------------------------------------
-##
-#
+    # -----------------------------------------------------------------------
+    ##
+    #
     def save(self, strPathname, strBackend):
 
         listSave = [
@@ -82,12 +97,27 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
             self.PotraceAbsPath, strPathname
         ] + self.m_listArgv + DEFAULT_ARGV
 
-        oCSVGData = subprocess.check_output(listArgv)
+        oCProcess = subprocess.Popen(
+            listArgv,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=False
+        )
 
-        self.CurrentSVGFile = strPathname
-        self.CurrentSVGData = oCSVGData
+        byteStdout, byteStderr = oCProcess.communicate()
 
-        self.update(bResetTransform)
+        if(len(byteStderr) == 0):
+            self.CurrentSVGFile = strPathname
+            self.CurrentSVGData = byteStdout
+
+            self.update(bResetTransform)
+        else:
+            PyQt5.QtWidgets.QMessageBox.critical(
+                self,
+                "Potrace convert error",
+                byteStderr.decode("utf-8")
+            )
 
     def set_argv(self, listArgv):
         self.m_listArgv = listArgv
@@ -111,22 +141,32 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
             oCQSvgItem = PyQt5.QtSvg.QGraphicsSvgItem()
             oCQSvgItem.setSharedRenderer(oCQSvgRenderer)
+            oCQSvgItem.setFlags(
+                PyQt5.QtWidgets.QGraphicsItem.ItemClipsToShape
+            )
+            oCQSvgItem.setCacheMode(
+                PyQt5.QtWidgets.QGraphicsItem.NoCache
+            )
+            oCQSvgItem.setZValue(0)
 
-            self.svgItem = oCQSvgItem
-            self.svgItem.setFlags(PyQt5.QtWidgets.QGraphicsItem.ItemClipsToShape)
-            self.svgItem.setCacheMode(PyQt5.QtWidgets.QGraphicsItem.NoCache)
-            self.svgItem.setZValue(0)
-
-            s.addItem(self.svgItem)
+            s.addItem(oCQSvgItem)
 
     def wheelEvent(self, oCQWheelEvent):
-        fValue = oCQWheelEvent.angleDelta().x() + oCQWheelEvent.angleDelta().y()
+        fValue = 0
+        fValue += oCQWheelEvent.angleDelta().x()
+        fValue += oCQWheelEvent.angleDelta().y()
         fFactor = pow(1.2, fValue / 240.0)
         self.scale(fFactor, fFactor)
 
 
+# ---------------------------------------------------------------------------
+##
+#
 class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
+    # -----------------------------------------------------------------------
+    ##
+    #
     def __init__(self):
         super(CMainWindow, self).__init__()
 
@@ -137,20 +177,29 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
         self.setCentralWidget(self.m_oCViewSVG)
 
+        # Configure Reader
 
-        ## Configure Reader
+        strPotracePath = self.__check_potrace()
 
-        strConfigurePath = os.path.join(os.getcwd(), "potrace_gui.conf")
-
-        if(os.path.exists(strConfigurePath) is True):
-            oCConf = configparser.ConfigParser()
-            oCConf.read(strConfigurePath)
-
-            self.m_oCViewSVG.set_potrace_path(
-                oCConf["POTRACE_GUI"]["POTRACE_BIN_PATH"]
+        if(strPotracePath != ""):
+            if(os.path.exists(strPotracePath) is True):
+                self.m_oCViewSVG.set_potrace_path(strPotracePath)
+            else:
+                PyQt5.QtWidgets.QMessageBox.critical(
+                    self,
+                    "Potrace Check",
+                    "File not found\n'%s'." % (strPotracePath,)
+                )
+        else:
+            PyQt5.QtWidgets.QMessageBox.critical(
+                self,
+                "Configure Check",
+                "Configure Error."
             )
 
-        ## Event Connect
+        self.setAcceptDrops(True)
+
+        # Event Connect
 
         self.ui.actionFileOpen.triggered.connect(self.actionFileOpen)
         self.ui.actionFileSaveAs.triggered.connect(self.actionFileSaveAs)
@@ -173,6 +222,27 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
         self.ui.ptPagesize.currentIndexChanged.connect(self.currentIndexChanged)
         self.ui.ptTight.stateChanged.connect(self.stateChanged)
+
+    # -----------------------------------------------------------------------
+    ##
+    #   @brief コンフィグファイルを開き、設定を読み込みます。
+    #
+    def __check_potrace(self):
+
+        strConfigurePath = os.path.join(os.getcwd(), "potrace_gui.conf")
+
+        strResult = ""
+
+        if(os.path.exists(strConfigurePath) is True):
+            oCConf = configparser.ConfigParser()
+            oCConf.read(strConfigurePath)
+
+            try:
+                strResult = oCConf["POTRACE_GUI"]["POTRACE_BIN_PATH"]
+            except KeyError:
+                pass
+
+        return(strResult)
 
     def __build_potrace_argv(self):
 
@@ -221,8 +291,11 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         if path:
             svg_file = PyQt5.QtCore.QFile(path)
             if not svg_file.exists():
-                QMessageBox.critical(self, "Open SVG File",
-                        "Could not open file '%s'." % path)
+                PyQt5.QtWidgets.QMessageBox.critical(
+                    self,
+                    "Open SVG File",
+                    "Could not open file '%s'." % (path,)
+                )
 
                 self.outlineAction.setEnabled(False)
                 self.backgroundAction.setEnabled(False)
@@ -274,6 +347,15 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         oCAbout = CAbout()
         oCAbout.exec()
 
+    def dragEnterEvent(self, oCQDragEnterEvent):
+        if(oCQDragEnterEvent.mimeData().hasFormat("text/uri-list") is True):
+            oCQDragEnterEvent.acceptProposedAction()
+
+    def dropEvent(self, oCQDropEvent):
+        strPath = oCQDropEvent.mimeData().text()
+        if(strPath.find("file://") == 0):
+            self.actionFileOpen(strPath[7:])
+
 
 class CAbout(PyQt5.QtWidgets.QDialog):
 
@@ -301,5 +383,4 @@ if(__name__ == '__main__'):
     sys.exit(main())
 
 
-
-# ---------------------------------------------------------------------- [EOF]
+# --------------------------------------------------------------------- [EOF]
