@@ -8,18 +8,19 @@ if(sys.platform == "win32"):
     base = "Win32GUI"
 
 build_exe_options = {
-    "packages": ["os", "subprocess"],
+    "packages": ["os", "codecs", "configparser", "encodings", "subprocess"],
     "excludes": ["tkinter"],
     "include_files": []
 }
 
 setup(
-        name = "potraceGUI",
-        version = "0.0",
-        description = "potrace GUI(PyQt5)",
-        author="@MizunagiKB",
-        url="https://github.com/MizunagiKB/potrace_gui",
-        options = {
-            "build_exe" : build_exe_options
-        },
-        executables = [Executable("potrace_gui.py", base = base)])
+    name="potraceGUI",
+    version="0.0",
+    description="potrace GUI(PyQt5)",
+    author="@MizunagiKB",
+    url="https://github.com/MizunagiKB/potrace_gui",
+    options={
+        "build_exe": build_exe_options
+    },
+    executables=[Executable("potrace_gui.py", base=base)]
+)
