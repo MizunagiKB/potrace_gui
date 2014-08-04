@@ -235,7 +235,7 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
         if(os.path.exists(strConfigurePath) is True):
             oCConf = configparser.ConfigParser()
-            oCConf.read(strConfigurePath)
+            oCConf.read(strConfigurePath, "utf-8")
 
             try:
                 strResult = oCConf["POTRACE_GUI"]["POTRACE_BIN_PATH"]
