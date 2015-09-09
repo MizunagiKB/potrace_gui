@@ -5,7 +5,7 @@ from cx_Freeze import setup, Executable
 
 base = None
 if(sys.platform == "win32"):
-    base = "Win32GUI"
+    base = None
 
 build_exe_options = {
     "packages": ["os", "codecs", "configparser", "encodings", "subprocess"],
