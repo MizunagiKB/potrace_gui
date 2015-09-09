@@ -1,6 +1,6 @@
 bin
 build
-potrace
+dist
 __pycache__
 *.conf
 *.exe
