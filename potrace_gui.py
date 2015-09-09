@@ -65,7 +65,7 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
     def set_potrace_path(self, strPath):
 
-        self.PotraceAbsPath = strPath
+        self.PotraceAbsPath = os.path.abspath(strPath)
 
     # -----------------------------------------------------------------------
     ##
