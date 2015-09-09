@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/MainWindow.ui'
+# Form implementation generated from reading ui file 'ui\MainWindow.ui'
 #
-# Created: Sun Aug  3 20:32:33 2014
-#      by: PyQt5 UI code generator 5.3.1
+# Created by: PyQt5 UI code generator 5.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -121,6 +120,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.ptInvert, 9, 1, 1, 1)
         self.ptTurdsize = QtWidgets.QSpinBox(self.groupBox_9)
         self.ptTurdsize.setFocusPolicy(QtCore.Qt.WheelFocus)
+        self.ptTurdsize.setProperty("value", 2)
         self.ptTurdsize.setObjectName("ptTurdsize")
         self.gridLayout.addWidget(self.ptTurdsize, 2, 1, 1, 1)
         self.label_59 = QtWidgets.QLabel(self.groupBox_9)

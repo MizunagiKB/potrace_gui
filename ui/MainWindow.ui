@@ -289,6 +289,9 @@
           <property name="focusPolicy">
            <enum>Qt::WheelFocus</enum>
           </property>
+          <property name="value">
+           <number>2</number>
+          </property>
          </widget>
         </item>
         <item row="7" column="0">
