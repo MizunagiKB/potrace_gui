@@ -1,4 +1,5 @@
-bin
+bin/potrace
+bin/potrace.*
 build
 dist
 __pycache__

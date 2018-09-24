@@ -47,7 +47,7 @@
       <item row="1" column="1">
        <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>http://mizuvm01.cloudapp.net/wp/</string>
+         <string>https://www.mizunagi-works.com/wp/</string>
         </property>
        </widget>
       </item>

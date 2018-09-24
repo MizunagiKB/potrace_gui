@@ -3,10 +3,14 @@
 # ----------------------------------------------------------------- import(s)
 import sys
 import os
+import io
 import subprocess
-import configparser
+import traceback
+
+import PIL.Image
 
 import PyQt5
+import PyQt5.Qt
 import PyQt5.QtCore
 import PyQt5.QtGui
 import PyQt5.QtSvg
@@ -17,12 +21,29 @@ import ui_About
 
 DEFAULT_ARGV = [
     "-s",
+    "-",
     "-o-"
 ]
 
 
-# ------------------------------------------------------------------ class(s)
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------- exception(s)
+class CExc(Exception):
+    pass
+
+class CExcPotrace(Exception):
+    pass
+
+class CExcPotraceNotFound(CExcPotrace):
+    pass
+
+class CExcPotraceNotExecutable(CExcPotrace):
+    pass
+
+class CExcPotracePermissionError(CExcPotrace):
+    pass
+
+# ------------------------------------------------------------------- class(s)
+# ----------------------------------------------------------------------------
 ##
 #
 class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
@@ -31,6 +52,8 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
     CurrentSVGFile = ""
     CurrentSVGData = ""
     PotraceAbsPath = ""
+
+    raw_bitmap_buffer = None
 
     # -----------------------------------------------------------------------
     ##
@@ -63,7 +86,7 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
         self.setBackgroundBrush(PyQt5.QtGui.QBrush(tilePixmap))
 
-    def set_potrace_path(self, strPath):
+    def set_potrace_exec_pathname(self, strPath):
 
         self.PotraceAbsPath = os.path.abspath(strPath)
 
@@ -84,48 +107,45 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
         subprocess.check_output(listArgv)
 
     # -----------------------------------------------------------------------
-    ##
-    #
-    def open(self, strPathname):
+    def open(self, image_pathname):
 
-        if(strPathname != self.CurrentSVGFile):
-            bResetTransform = True
-        else:
-            bResetTransform = False
+        h_file = io.BytesIO()
+        o_image = PIL.Image.open(image_pathname)
+        o_image.save(h_file, "bmp")
 
-        listArgv = [
-            self.PotraceAbsPath, strPathname
-        ] + self.m_listArgv + DEFAULT_ARGV
+        h_file.seek(0)
+        self.raw_bitmap_buffer = h_file.read()
 
-        oCProcess = subprocess.Popen(
-            listArgv,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=False
-        )
+        self.CurrentSVGFile = image_pathname
 
-        byteStdout, byteStderr = oCProcess.communicate()
+        self.reload()
+        self.update(True)
 
-        if(len(byteStderr) == 0):
-            self.CurrentSVGFile = strPathname
-            self.CurrentSVGData = byteStdout
-
-            self.update(bResetTransform)
-        else:
-            PyQt5.QtWidgets.QMessageBox.critical(
-                self,
-                "Potrace convert error",
-                byteStderr.decode("utf-8")
-            )
 
     def set_argv(self, listArgv):
         self.m_listArgv = listArgv
 
     def reload(self):
 
-        if(os.path.exists(self.CurrentSVGFile) is True):
-            self.open(self.CurrentSVGFile)
+        if self.raw_bitmap_buffer is not None:
+
+            listArgv = [
+                self.PotraceAbsPath
+            ] + self.m_listArgv + DEFAULT_ARGV
+
+            oCProcess = subprocess.Popen(
+                listArgv,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=False
+            )
+
+            byteStdout, byteStderr = oCProcess.communicate(input=self.raw_bitmap_buffer)
+
+            self.CurrentSVGData = byteStdout
+
+            self.update(False)
 
     def update(self, bResetTransform):
 
@@ -160,42 +180,39 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
 
 # ---------------------------------------------------------------------------
-##
-#
 class CMainWindow(PyQt5.QtWidgets.QMainWindow):
+    """
+    MainFrame
+    """
 
     # -----------------------------------------------------------------------
-    ##
-    #
     def __init__(self):
+        """
+        Constructer
+        """
+
         super(CMainWindow, self).__init__()
+
+        # check potrace binary
+        try:
+            base_pathname = os.path.split(sys.argv[0])[0]
+            self.potrace_exec_pathname = potrace_exists(base_pathname)
+        except CExcPotrace as exc_message:
+            self.potrace_exec_pathname = "None"
+            print(exc_message)
+            PyQt5.QtWidgets.QMessageBox.critical(
+                self,
+                "Potrace exists check.",
+                str(exc_message)
+            )
 
         self.ui = ui_MainWindow.Ui_MainWindow()
         self.ui.setupUi(self)
 
         self.m_oCViewSVG = CViewSVG()
+        self.m_oCViewSVG.set_potrace_exec_pathname(self.potrace_exec_pathname)
 
         self.setCentralWidget(self.m_oCViewSVG)
-
-        # Configure Reader
-
-        strPotracePath = self.__check_potrace()
-
-        if(strPotracePath != ""):
-            if(os.path.exists(strPotracePath) is True):
-                self.m_oCViewSVG.set_potrace_path(strPotracePath)
-            else:
-                PyQt5.QtWidgets.QMessageBox.critical(
-                    self,
-                    "Potrace Check",
-                    "File not found\n'%s'." % (strPotracePath,)
-                )
-        else:
-            PyQt5.QtWidgets.QMessageBox.critical(
-                self,
-                "Configure Check",
-                "Configure Error."
-            )
 
         self.setAcceptDrops(True)
 
@@ -224,26 +241,6 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         self.ui.ptTight.stateChanged.connect(self.stateChanged)
 
     # -----------------------------------------------------------------------
-    ##
-    #   @brief コンフィグファイルを開き、設定を読み込みます。
-    #
-    def __check_potrace(self):
-
-        strConfigurePath = os.path.join(os.getcwd(), "potrace_gui.conf")
-
-        strResult = ""
-
-        if(os.path.exists(strConfigurePath) is True):
-            oCConf = configparser.ConfigParser()
-            oCConf.read(strConfigurePath, "utf-8")
-
-            try:
-                strResult = oCConf["POTRACE_GUI"]["POTRACE_BIN_PATH"]
-            except KeyError:
-                pass
-
-        return(strResult)
-
     def __build_potrace_argv(self):
 
         listArgv = []
@@ -286,7 +283,7 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
             path, _ = PyQt5.QtWidgets.QFileDialog.getOpenFileName(
                 self,
                 "Open Bitmap File",
-                "Potrace Supported File", "Bitmap files (*.pbm *.pgm *.ppm *.bmp)")
+                "Potrace Supported File", "Bitmap files (*.bmp *.jpg *.jpeg *.png)")
 
         if path:
             svg_file = PyQt5.QtCore.QFile(path)
@@ -353,7 +350,7 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
     def dropEvent(self, oCQDropEvent):
         strPath = oCQDropEvent.mimeData().text()
-        if(strPath.find("file://") == 0):
+        if strPath.find("file://") == 0:
             self.actionFileOpen(strPath[7:])
 
 
@@ -364,6 +361,33 @@ class CAbout(PyQt5.QtWidgets.QDialog):
 
         self.ui = ui_About.Ui_Dialog()
         self.ui.setupUi(self)
+
+
+# ---------------------------------------------------------------- function(s)
+def potrace_exists(base_pathname):
+    """
+    potraceが呼び出せるか確認を行います。
+    """
+
+    list_potrace_pathname = [
+        "potrace",
+        os.path.join(base_pathname, "bin", "potrace")
+    ]
+
+    for rel_path in list_potrace_pathname:
+        abs_path = os.path.abspath(rel_path)
+        if os.path.exists(abs_path) is True:
+            stdout_captured = io.TextIOBase()
+            try:
+                o_result = subprocess.run([abs_path, "-v"], check=True, stdout=subprocess.PIPE)
+                if o_result.returncode == 0:
+                    return abs_path
+                else:
+                    raise CExcPotraceNotExecutable("'{}' can not be executed.".format(abs_path))
+            except PermissionError:
+                raise CExcPotraceNotExecutable("'{}' can not be executed.".format(abs_path))
+
+    raise CExcPotraceNotFound("Potrace is not found.")
 
 
 # ===========================================================================
@@ -379,8 +403,9 @@ def main():
     return(oCApp.exec_())
 
 
-if(__name__ == '__main__'):
-    sys.exit(main())
+if __name__ == "__main__":
+    main()
+
 
 
 # --------------------------------------------------------------------- [EOF]

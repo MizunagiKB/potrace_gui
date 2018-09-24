@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/About.ui'
 #
-# Created: Sat Aug  2 22:02:18 2014
-#      by: PyQt5 UI code generator 5.3.1
+# Created by: PyQt5 UI code generator 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -48,6 +47,6 @@ class Ui_Dialog(object):
         self.label.setText(_translate("Dialog", "Author"))
         self.label_2.setText(_translate("Dialog", "@MizunagiKB"))
         self.label_3.setText(_translate("Dialog", "Web site"))
-        self.label_4.setText(_translate("Dialog", "http://mizuvm01.cloudapp.net/wp/"))
+        self.label_4.setText(_translate("Dialog", "https://www.mizunagi-works.com/wp/"))
         self.btnOK.setText(_translate("Dialog", "OK"))
 

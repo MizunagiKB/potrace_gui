@@ -8,9 +8,11 @@ if(sys.platform == "win32"):
     base = None
 
 build_exe_options = {
-    "packages": ["os", "codecs", "configparser", "encodings", "subprocess"],
+    "packages": ["os", "codecs", "encodings", "subprocess"],
     "excludes": ["tkinter"],
-    "include_files": []
+    "include_files": [
+        "bin/README"
+    ]
 }
 
 setup(
