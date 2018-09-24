@@ -294,8 +294,8 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
                     "Could not open file '%s'." % (path,)
                 )
 
-                self.outlineAction.setEnabled(False)
-                self.backgroundAction.setEnabled(False)
+                #self.outlineAction.setEnabled(False)
+                #self.backgroundAction.setEnabled(False)
                 return
 
             self.m_oCViewSVG.open(svg_file.fileName())
@@ -350,8 +350,14 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
     def dropEvent(self, oCQDropEvent):
         strPath = oCQDropEvent.mimeData().text()
-        if strPath.find("file://") == 0:
-            self.actionFileOpen(strPath[7:])
+        if sys.platform in ("win32",):
+            prefix_path = "file:///"
+        else:
+            prefix_path = "file://"
+
+        prefix_path_len = len(prefix_path)
+        if strPath.find(prefix_path) == 0:
+            self.actionFileOpen(strPath[prefix_path_len:])
 
 
 class CAbout(PyQt5.QtWidgets.QDialog):
@@ -375,6 +381,8 @@ def potrace_exists(base_pathname):
     ]
 
     for rel_path in list_potrace_pathname:
+        if sys.platform in ("win32",):
+            rel_path += ".exe"
         abs_path = os.path.abspath(rel_path)
         if os.path.exists(abs_path) is True:
             stdout_captured = io.TextIOBase()
