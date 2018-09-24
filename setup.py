@@ -11,7 +11,7 @@ build_exe_options = {
     "packages": ["os", "codecs", "encodings", "subprocess"],
     "excludes": ["tkinter"],
     "include_files": [
-        "bin/README"
+        "bin"
     ]
 }
 
