@@ -17,7 +17,7 @@ build_exe_options = {
 
 setup(
     name="potraceGUI",
-    version="0.0",
+    version="0.1.0",
     description="potrace GUI(PyQt5)",
     author="@MizunagiKB",
     url="https://github.com/MizunagiKB/potrace_gui",
