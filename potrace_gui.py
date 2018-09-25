@@ -97,14 +97,23 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
         listSave = [
             "--backend=" + strBackend,
+            "-",
             "--output=" + strPathname
         ]
 
         listArgv = [
-            self.PotraceAbsPath, self.CurrentSVGFile
+            self.PotraceAbsPath,
         ] + self.m_listArgv + listSave
 
-        subprocess.check_output(listArgv)
+        o_process = subprocess.Popen(
+            listArgv,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=False
+        )
+
+        o_process.communicate(input=self.raw_bitmap_buffer)
 
     # -----------------------------------------------------------------------
     def open(self, image_pathname):
@@ -180,6 +189,36 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
 
 # ---------------------------------------------------------------------------
+class CDropWidget(PyQt5.QtWidgets.QGroupBox):
+
+    def attach(self, o_parent):
+        self.m_o_parent = o_parent
+
+    def detach(self):
+        o_parent = self.m_o_parent
+        self.m_o_parent = None
+
+        return o_parent
+
+    def dragEnterEvent(self, oCQDragEnterEvent):
+        if oCQDragEnterEvent.mimeData().hasUrls() is True:
+            oCQDragEnterEvent.acceptProposedAction()
+
+    def dropEvent(self, oCQDropEvent):
+        for s in oCQDropEvent.mimeData().urls():
+
+            self.m_o_parent.actionFileOpen(s.path())
+
+            str_backend = self.m_o_parent.ui.ptBackend.currentText()
+
+            self.m_o_parent.m_oCViewSVG.save(
+                s.path() + "." + str_backend,
+                str_backend
+            )
+        oCQDropEvent.acceptProposedAction()
+
+
+# ---------------------------------------------------------------------------
 class CMainWindow(PyQt5.QtWidgets.QMainWindow):
     """
     MainFrame
@@ -216,6 +255,12 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
         self.setAcceptDrops(True)
 
+        o_drop_region = CDropWidget(self)
+        o_drop_region.setAcceptDrops(True)
+        self.ui.verticalLayout.addWidget(o_drop_region)
+        o_drop_region.attach(self)
+
+
         # Event Connect
 
         self.ui.actionFileOpen.triggered.connect(self.actionFileOpen)
@@ -233,6 +278,8 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         self.ui.ptLongcurve.stateChanged.connect(self.stateChanged)
         self.ui.ptOpttolerance.valueChanged.connect(self.valueChanged)
         self.ui.ptUnit.valueChanged.connect(self.valueChanged)
+
+        self.ui.ptOpaque.stateChanged.connect(self.stateChanged)
 
         self.ui.ptBlacklevel.valueChanged.connect(self.valueChanged)
         self.ui.ptInvert.stateChanged.connect(self.stateChanged)
@@ -255,13 +302,16 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         listArgv.append("--opttolerance=" + str(self.ui.ptOpttolerance.value()))
         listArgv.append("--unit=" + str(self.ui.ptUnit.value()))
 
-        listArgv.append("--blacklevel=" + str(self.ui.ptBlacklevel.value()))
-        if(self.ui.ptInvert.checkState() == PyQt5.QtCore.Qt.Checked):
-            listArgv.append("--invert")
-
         listArgv.append("--pagesize=" + self.ui.ptPagesize.currentText())
         if(self.ui.ptTight.checkState() == PyQt5.QtCore.Qt.Checked):
             listArgv.append("--tight")
+
+        if(self.ui.ptOpaque.checkState() == PyQt5.QtCore.Qt.Checked):
+            listArgv.append("--opaque")
+
+        listArgv.append("--blacklevel=" + str(self.ui.ptBlacklevel.value()))
+        if(self.ui.ptInvert.checkState() == PyQt5.QtCore.Qt.Checked):
+            listArgv.append("--invert")
 
         self.m_oCViewSVG.set_argv(listArgv)
 
@@ -283,7 +333,16 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
             path, _ = PyQt5.QtWidgets.QFileDialog.getOpenFileName(
                 self,
                 "Open Bitmap File",
-                "Potrace Supported File", "Bitmap files (*.bmp *.jpg *.jpeg *.png)")
+                "Potrace Supported File",
+                "Image files (*.bmp *.gif *.jpg *.jpeg *.pcx *.png *.tga *.tif *.tiff)"
+                ";;Bitmap file (*.bmp)"
+                ";;GIF file (*.gif)"
+                ";;JPEG file (*.jpg *.jpeg)"
+                ";;PCX file (*.pcx)"
+                ";;PNG file (*.png)"
+                ";;TGA file (*.tga)"
+                ";;TIFF file (*.tif *.tiff)"
+            )
 
         if path:
             svg_file = PyQt5.QtCore.QFile(path)
@@ -298,6 +357,7 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
                 #self.backgroundAction.setEnabled(False)
                 return
 
+            self.__build_potrace_argv()
             self.m_oCViewSVG.open(svg_file.fileName())
 
     def actionFileSaveAs(self):
@@ -345,19 +405,22 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         oCAbout.exec()
 
     def dragEnterEvent(self, oCQDragEnterEvent):
-        if(oCQDragEnterEvent.mimeData().hasFormat("text/uri-list") is True):
+        if oCQDragEnterEvent.mimeData().hasText() is True:
             oCQDragEnterEvent.acceptProposedAction()
 
     def dropEvent(self, oCQDropEvent):
-        strPath = oCQDropEvent.mimeData().text()
-        if sys.platform in ("win32",):
-            prefix_path = "file:///"
-        else:
-            prefix_path = "file://"
+        for s in oCQDropEvent.mimeData().text().split():
+            if sys.platform in ("win32",):
+                prefix_path = "file:///"
+            else:
+                prefix_path = "file://"
 
-        prefix_path_len = len(prefix_path)
-        if strPath.find(prefix_path) == 0:
-            self.actionFileOpen(strPath[prefix_path_len:])
+            prefix_path_len = len(prefix_path)
+            if s.find(prefix_path) == 0:
+                self.actionFileOpen(s[prefix_path_len:])
+                break
+
+        oCQDropEvent.acceptProposedAction()
 
 
 class CAbout(PyQt5.QtWidgets.QDialog):
