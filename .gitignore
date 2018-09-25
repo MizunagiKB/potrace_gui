@@ -7,3 +7,8 @@ __pycache__
 *.exe
 *.pyc
 *.sh
+*.png
+*.eps
+*.pdf
+*.jpg
+*.jpeg

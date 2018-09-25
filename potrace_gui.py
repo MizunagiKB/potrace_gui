@@ -207,12 +207,17 @@ class CDropWidget(PyQt5.QtWidgets.QGroupBox):
     def dropEvent(self, oCQDropEvent):
         for s in oCQDropEvent.mimeData().urls():
 
-            self.m_o_parent.actionFileOpen(s.path())
+            if sys.platform == "win32":
+                pathname = s.path()[1:]
+            else:
+                pathname = s.path()
+
+            self.m_o_parent.actionFileOpen(pathname)
 
             str_backend = self.m_o_parent.ui.ptBackend.currentText()
 
             self.m_o_parent.m_oCViewSVG.save(
-                s.path() + "." + str_backend,
+                pathname + "." + str_backend,
                 str_backend
             )
         oCQDropEvent.acceptProposedAction()
