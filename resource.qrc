@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="ICONS">
+    <file>res/picture_edit.png</file>
+    <file>res/application_tile_horizontal.png</file>
+    <file>res/application_tile_vertical.png</file>
     <file>res/arrow_refresh.png</file>
     <file>res/picture_link.png</file>
     <file>res/information.png</file>

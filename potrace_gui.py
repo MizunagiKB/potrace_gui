@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ----------------------------------------------------------------- import(s)
 import sys
@@ -25,6 +25,13 @@ DEFAULT_ARGV = [
     "-o-"
 ]
 
+# ------------------------------------------------------------------- param(s)
+POTRACE_PATH = None
+VIEW_MODE_SRC = 0
+VIEW_MODE_DST = 1
+
+# ------------------------------------------------------------------ global(s)
+APP_INSTANCE = None
 
 # --------------------------------------------------------------- exception(s)
 class CExc(Exception):
@@ -42,18 +49,19 @@ class CExcPotraceNotExecutable(CExcPotrace):
 class CExcPotracePermissionError(CExcPotrace):
     pass
 
+
 # ------------------------------------------------------------------- class(s)
 # ----------------------------------------------------------------------------
-##
-#
 class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
     m_listArgv = []
     CurrentSVGFile = ""
     CurrentSVGData = ""
-    PotraceAbsPath = ""
 
-    raw_bitmap_buffer = None
+    VIEW_MODE = None
+    src_path = None
+    svg_data = None
+    bmp_data = None
 
     # -----------------------------------------------------------------------
     ##
@@ -86,13 +94,10 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
 
         self.setBackgroundBrush(PyQt5.QtGui.QBrush(tilePixmap))
 
-    def set_potrace_exec_pathname(self, strPath):
-
-        self.PotraceAbsPath = os.path.abspath(strPath)
+    def set_view_mode(self, VIEW_MODE):
+        self.VIEW_MODE = VIEW_MODE
 
     # -----------------------------------------------------------------------
-    ##
-    #
     def save(self, strPathname, strBackend):
 
         listSave = [
@@ -101,9 +106,7 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
             "--output=" + strPathname
         ]
 
-        listArgv = [
-            self.PotraceAbsPath,
-        ] + self.m_listArgv + listSave
+        listArgv = [POTRACE_PATH] + self.m_listArgv + listSave
 
         o_process = subprocess.Popen(
             listArgv,
@@ -113,79 +116,84 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
             shell=False
         )
 
-        o_process.communicate(input=self.raw_bitmap_buffer)
+        o_process.communicate(input=self.bmp_data)
 
     # -----------------------------------------------------------------------
-    def open(self, image_pathname):
+    def open(self, src_pathname):
+
+        self.resetTransform()
+        self.scene().clear()
+
+        self.setScene(PyQt5.QtWidgets.QGraphicsScene(self))
 
         h_file = io.BytesIO()
-        o_image = PIL.Image.open(image_pathname)
+        o_image = PIL.Image.open(src_pathname)
         o_image.save(h_file, "bmp")
 
         h_file.seek(0)
-        self.raw_bitmap_buffer = h_file.read()
+        self.bmp_data = h_file.read()
 
-        self.CurrentSVGFile = image_pathname
+        o_pixmap = PyQt5.Qt.QPixmap()
+        o_pixmap.loadFromData(self.bmp_data)
+
+        o_item_src = PyQt5.Qt.QGraphicsPixmapItem()
+        o_item_src.setPixmap(o_pixmap)
+
+        self.o_item_src = o_item_src
+
+        self.src_path = src_pathname
 
         self.reload()
-        self.update(True)
+        self.update()
 
 
     def set_argv(self, listArgv):
+
         self.m_listArgv = listArgv
 
     def reload(self):
 
-        if self.raw_bitmap_buffer is not None:
+        if self.bmp_data is not None:
 
-            listArgv = [
-                self.PotraceAbsPath
-            ] + self.m_listArgv + DEFAULT_ARGV
+            list_argv = [POTRACE_PATH] + self.m_listArgv + ["-s", "-", "-o-"]
 
-            oCProcess = subprocess.Popen(
-                listArgv,
+            o_proc = subprocess.Popen(
+                list_argv,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 shell=False
             )
 
-            byteStdout, byteStderr = oCProcess.communicate(input=self.raw_bitmap_buffer)
+            self.svg_data, byteStderr = o_proc.communicate(input=self.bmp_data)
 
-            self.CurrentSVGData = byteStdout
+            o_svg_renderer = PyQt5.QtSvg.QSvgRenderer(self.svg_data)
 
-            self.update(False)
+            o_item_dst = PyQt5.QtSvg.QGraphicsSvgItem()
+            o_item_dst.setSharedRenderer(o_svg_renderer)
+            o_item_dst.setFlags(PyQt5.QtWidgets.QGraphicsItem.ItemClipsToShape)
+            o_item_dst.setCacheMode(PyQt5.QtWidgets.QGraphicsItem.NoCache)
+            o_item_dst.setZValue(0)
 
-    def update(self, bResetTransform):
+            self.o_item_dst = o_item_dst
 
-        if(self.CurrentSVGData != ""):
-            if(bResetTransform is True):
-                self.setScene(PyQt5.QtWidgets.QGraphicsScene(self))
-                self.resetTransform()
+    def update(self):
 
-            s = self.scene()
-            s.clear()
+        for o in self.scene().items():
+            self.scene().removeItem(o)
 
-            oCQSvgRenderer = PyQt5.QtSvg.QSvgRenderer(self.CurrentSVGData)
-
-            oCQSvgItem = PyQt5.QtSvg.QGraphicsSvgItem()
-            oCQSvgItem.setSharedRenderer(oCQSvgRenderer)
-            oCQSvgItem.setFlags(
-                PyQt5.QtWidgets.QGraphicsItem.ItemClipsToShape
-            )
-            oCQSvgItem.setCacheMode(
-                PyQt5.QtWidgets.QGraphicsItem.NoCache
-            )
-            oCQSvgItem.setZValue(0)
-
-            s.addItem(oCQSvgItem)
+        if self.VIEW_MODE == VIEW_MODE_SRC:
+            self.scene().addItem(self.o_item_src)
+        else:
+            self.scene().addItem(self.o_item_dst)
 
     def wheelEvent(self, oCQWheelEvent):
         fValue = 0
         fValue += oCQWheelEvent.angleDelta().x()
         fValue += oCQWheelEvent.angleDelta().y()
         fFactor = pow(1.2, fValue / 240.0)
-        self.scale(fFactor, fFactor)
+
+        APP_INSTANCE.m_view_dst.scale(fFactor, fFactor)
 
 
 # ---------------------------------------------------------------------------
@@ -234,16 +242,16 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         """
         Constructer
         """
-
         super(CMainWindow, self).__init__()
+
+        global POTRACE_PATH
 
         # check potrace binary
         try:
             base_pathname = os.path.split(sys.argv[0])[0]
-            self.potrace_exec_pathname = potrace_exists(base_pathname)
+            POTRACE_PATH = potrace_exists(base_pathname)
         except CExcPotrace as exc_message:
-            self.potrace_exec_pathname = "None"
-            print(exc_message)
+            POTRACE_PATH = None
             PyQt5.QtWidgets.QMessageBox.critical(
                 self,
                 "Potrace exists check.",
@@ -254,9 +262,13 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         self.ui.setupUi(self)
 
         self.m_oCViewSVG = CViewSVG()
-        self.m_oCViewSVG.set_potrace_exec_pathname(self.potrace_exec_pathname)
-
+        self.m_oCViewSVG.set_view_mode(VIEW_MODE_DST)
         self.setCentralWidget(self.m_oCViewSVG)
+
+        APP_INSTANCE.m_view_src = None
+        APP_INSTANCE.m_view_dst = self.m_oCViewSVG
+
+
 
         self.setAcceptDrops(True)
 
@@ -265,6 +277,8 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         self.ui.verticalLayout.addWidget(o_drop_region)
         o_drop_region.attach(self)
 
+        #
+        self.m_refresh_timer = PyQt5.Qt.QTimer(self)
 
         # Event Connect
 
@@ -275,6 +289,7 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         self.ui.actionViewZoomReset.triggered.connect(self.actionViewZoomReset)
         self.ui.actionViewRefresh.triggered.connect(self.actionViewRefresh)
         self.ui.actionViewAutoRefresh.triggered.connect(self.actionViewAutoRefresh)
+        self.ui.actionViewPreview.triggered.connect(self.actionViewPreview)
         self.ui.actionHelpAbout.triggered.connect(self.actionHelpAbout)
 
         self.ui.ptTurnpolicy.currentIndexChanged.connect(self.currentIndexChanged)
@@ -291,6 +306,8 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
         self.ui.ptPagesize.currentIndexChanged.connect(self.currentIndexChanged)
         self.ui.ptTight.stateChanged.connect(self.stateChanged)
+
+        self.m_refresh_timer.timeout.connect(self.singleShot)
 
     # -----------------------------------------------------------------------
     def __build_potrace_argv(self):
@@ -320,8 +337,13 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
         self.m_oCViewSVG.set_argv(listArgv)
 
-        if(self.ui.actionViewAutoRefresh.isChecked() is True):
-            self.m_oCViewSVG.reload()
+        if self.ui.actionViewAutoRefresh.isChecked() is True:
+            self.m_refresh_timer.setSingleShot(True)
+            self.m_refresh_timer.start(1000)
+
+    def singleShot(self):
+        self.m_oCViewSVG.reload()
+        self.m_oCViewSVG.update()
 
     def currentIndexChanged(self, nIndex):
         self.__build_potrace_argv()
@@ -350,28 +372,26 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
             )
 
         if path:
+
             svg_file = PyQt5.QtCore.QFile(path)
-            if not svg_file.exists():
+
+            if svg_file.exists() is True:
+                self.__build_potrace_argv()
+                self.m_oCViewSVG.open(svg_file.fileName())
+            else:
                 PyQt5.QtWidgets.QMessageBox.critical(
                     self,
                     "Open SVG File",
                     "Could not open file '%s'." % (path,)
                 )
 
-                #self.outlineAction.setEnabled(False)
-                #self.backgroundAction.setEnabled(False)
-                return
-
-            self.__build_potrace_argv()
-            self.m_oCViewSVG.open(svg_file.fileName())
-
     def actionFileSaveAs(self):
 
         strBackend = self.ui.ptBackend.currentText()
 
-        strPath, strExt = os.path.splitext(self.m_oCViewSVG.CurrentSVGFile)
+        strPath, strExt = os.path.splitext(self.m_oCViewSVG.src_path)
 
-        if(strPath != ""):
+        if strPath != "":
 
             strSavePathname = strPath + ".%s" % (strBackend,)
             strMask = "Vector files (*.%s)" % (strBackend,)
@@ -400,30 +420,38 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
 
     def actionViewRefresh(self):
         self.m_oCViewSVG.reload()
+        self.m_oCViewSVG.update()
 
-    def actionViewAutoRefresh(self, bChecked):
-        if(bChecked is True):
-            self.m_oCViewSVG.reload()
+    def actionViewAutoRefresh(self, b_checked):
+        self.m_oCViewSVG.reload()
+        self.m_oCViewSVG.update()
+
+
+    def actionViewPreview(self, b_checked):
+        if b_checked is True:
+            self.m_oCViewSVG.set_view_mode(VIEW_MODE_DST)
+        else:
+            self.m_oCViewSVG.set_view_mode(VIEW_MODE_SRC)
+        self.m_oCViewSVG.update()
 
     def actionHelpAbout(self):
         oCAbout = CAbout()
         oCAbout.exec()
 
     def dragEnterEvent(self, oCQDragEnterEvent):
-        if oCQDragEnterEvent.mimeData().hasText() is True:
+        if oCQDragEnterEvent.mimeData().hasUrls() is True:
             oCQDragEnterEvent.acceptProposedAction()
 
     def dropEvent(self, oCQDropEvent):
-        for s in oCQDropEvent.mimeData().text().split():
-            if sys.platform in ("win32",):
-                prefix_path = "file:///"
-            else:
-                prefix_path = "file://"
+        for s in oCQDropEvent.mimeData().urls():
 
-            prefix_path_len = len(prefix_path)
-            if s.find(prefix_path) == 0:
-                self.actionFileOpen(s[prefix_path_len:])
-                break
+            if sys.platform == "win32":
+                pathname = s.path()[1:]
+            else:
+                pathname = s.path()
+
+            self.actionFileOpen(pathname)
+            break
 
         oCQDropEvent.acceptProposedAction()
 
@@ -470,13 +498,15 @@ def potrace_exists(base_pathname):
 ##
 #
 def main():
+    global APP_INSTANCE
 
-    oCApp = PyQt5.QtWidgets.QApplication(sys.argv)
+    APP_INSTANCE = PyQt5.QtWidgets.QApplication(sys.argv)
 
-    oCMain = CMainWindow()
-    oCMain.show()
+    if APP_INSTANCE is not None:
+        o_main = CMainWindow()
+        o_main.show()
 
-    return(oCApp.exec_())
+        APP_INSTANCE.exec_()
 
 
 if __name__ == "__main__":
