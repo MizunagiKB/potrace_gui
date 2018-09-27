@@ -1,5 +1,6 @@
 bin/potrace
 bin/potrace.*
+bin/*.tar.gz
 build
 dist
 __pycache__
