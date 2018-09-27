@@ -360,114 +360,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QGroupBox" name="groupBox_2">
-       <property name="title">
-        <string>Scaling and Placement</string>
-       </property>
-       <layout class="QFormLayout" name="formLayout_2">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_47">
-          <property name="minimumSize">
-           <size>
-            <width>140</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>-P, --pagesize</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QCheckBox" name="ptTight">
-          <property name="minimumSize">
-           <size>
-            <width>128</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>--tight</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QComboBox" name="ptPagesize">
-          <property name="minimumSize">
-           <size>
-            <width>128</width>
-            <height>0</height>
-           </size>
-          </property>
-          <item>
-           <property name="text">
-            <string>A4</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>A3</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>A5</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>B5</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Letter</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Legal</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Tabloid</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Statement</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Executive</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Folio</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Quarto</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>10x14</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
       <widget class="QGroupBox" name="groupBox_3">
        <property name="title">
         <string>Frontend and Color</string>
@@ -554,6 +446,120 @@
       </widget>
      </item>
      <item>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Scaling and Placement</string>
+       </property>
+       <layout class="QFormLayout" name="formLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_47">
+          <property name="minimumSize">
+           <size>
+            <width>140</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>-P, --pagesize</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="ptPagesize">
+          <property name="minimumSize">
+           <size>
+            <width>128</width>
+            <height>0</height>
+           </size>
+          </property>
+          <item>
+           <property name="text">
+            <string>A4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>A3</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>A5</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>B5</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Letter</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Legal</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Tabloid</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Statement</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Executive</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Folio</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Quarto</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>10x14</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QCheckBox" name="ptTight">
+          <property name="minimumSize">
+           <size>
+            <width>128</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>--tight</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
         <number>6</number>
@@ -570,16 +576,6 @@
        <property name="verticalSpacing">
         <number>-1</number>
        </property>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>BACKEND TYPES</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QComboBox" name="ptBackend">
          <property name="maximumSize">
@@ -633,6 +629,16 @@
            <string>xfig</string>
           </property>
          </item>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>BACKEND TYPES</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
         </widget>
        </item>
       </layout>
