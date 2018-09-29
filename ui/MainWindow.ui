@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>805</height>
+    <height>800</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -94,14 +94,12 @@
    <addaction name="separator"/>
    <addaction name="actionViewRefresh"/>
    <addaction name="actionViewAutoRefresh"/>
-   <addaction name="separator"/>
-   <addaction name="actionViewPreview"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget_7">
    <property name="minimumSize">
     <size>
      <width>330</width>
-     <height>583</height>
+     <height>540</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -365,22 +363,9 @@
         <string>Frontend and Color</string>
        </property>
        <layout class="QFormLayout" name="formLayout_3">
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="minimumSize">
-           <size>
-            <width>140</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
+        <property name="bottomMargin">
+         <number>6</number>
+        </property>
         <item row="2" column="1">
          <widget class="QCheckBox" name="ptOpaque">
           <property name="minimumSize">
@@ -685,6 +670,21 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout"/>
    </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar_3">
+   <property name="windowTitle">
+    <string>toolBar_3</string>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionViewPreview"/>
   </widget>
   <action name="actionFileClose">
    <property name="text">
