@@ -59,6 +59,8 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
     CurrentSVGData = ""
 
     VIEW_MODE = None
+    o_item_src = None
+    o_item_dst = None
     src_path = None
     svg_data = None
     bmp_data = None
@@ -183,9 +185,11 @@ class CViewSVG(PyQt5.QtWidgets.QGraphicsView):
             self.scene().removeItem(o)
 
         if self.VIEW_MODE == VIEW_MODE_SRC:
-            self.scene().addItem(self.o_item_src)
+            if self.o_item_src is not None:
+                self.scene().addItem(self.o_item_src)
         else:
-            self.scene().addItem(self.o_item_dst)
+            if self.o_item_dst is not None:
+                self.scene().addItem(self.o_item_dst)
 
     def wheelEvent(self, oCQWheelEvent):
         fValue = 0
@@ -283,7 +287,10 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
         # Event Connect
 
         self.ui.actionFileOpen.triggered.connect(self.actionFileOpen)
-        self.ui.actionFileSaveAs.triggered.connect(self.actionFileSaveAs)
+        self.ui.actionFileSaveAs.triggered.connect(self.triggeredFileSaveAs)
+        self.ui.actionFileSaveAs.setEnabled(False)
+        self.ui.btnSaveAs.setEnabled(False)
+
         self.ui.actionViewZoomIn.triggered.connect(self.actionViewZoomIn)
         self.ui.actionViewZoomOut.triggered.connect(self.actionViewZoomOut)
         self.ui.actionViewZoomReset.triggered.connect(self.actionViewZoomReset)
@@ -385,7 +392,20 @@ class CMainWindow(PyQt5.QtWidgets.QMainWindow):
                     "Could not open file '%s'." % (path,)
                 )
 
-    def actionFileSaveAs(self):
+            self.ui.actionFileSaveAs.setEnabled(True)
+            self.ui.btnSaveAs.setEnabled(True)
+
+    # ------------------------------------------------------------------------
+    def triggeredFileSaveAs(self):
+        """
+        """
+
+        if self.m_oCViewSVG.src_path is None:
+            self.ui.actionFileSaveAs.setEnabled(False)
+            return
+        if os.path.exists(self.m_oCViewSVG.src_path) is not True:
+            self.ui.actionFileSaveAs.setEnabled(False)
+            return
 
         strBackend = self.ui.ptBackend.currentText()
 
