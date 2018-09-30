@@ -14,4 +14,8 @@
     <file>res/zoom_out.png</file>
     <file>res/zoom.png</file>
   </qresource>
+  <qresource prefix="IMAGES">
+    <file>res/potrace-logo-468_s.png</file>
+    <file>res/potrace-logo-468.png</file>
+  </qresource>
 </RCC>
