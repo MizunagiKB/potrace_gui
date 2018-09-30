@@ -16,6 +16,10 @@
   <property name="windowTitle">
    <string>potrace GUI</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resource.qrc">
+    <normaloff>:/IMAGES/res/potrace-logo-468_s.png</normaloff>:/IMAGES/res/potrace-logo-468_s.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -99,7 +103,7 @@
    <property name="minimumSize">
     <size>
      <width>330</width>
-     <height>540</height>
+     <height>574</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -869,6 +873,22 @@
     <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFileClose</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>511</x>
+     <y>399</y>
     </hint>
    </hints>
   </connection>
