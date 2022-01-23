@@ -496,6 +496,15 @@ def potrace_exists(base_pathname):
         os.path.join(base_pathname, "bin", "potrace")
     ]
 
+    if "linux" in sys.platform:
+        sub_output = subprocess.run(["which", "potrace"], capture_output=True)
+        code = sub_output.returncode
+        if code == 0:
+            potrace_linux_path = sub_output.stdout.decode().strip()
+            return potrace_linux_path
+        else:
+            raise CExcPotraceNotFound("Potrace is not found.")
+
     for rel_path in list_potrace_pathname:
         if sys.platform in ("win32",):
             rel_path += ".exe"
